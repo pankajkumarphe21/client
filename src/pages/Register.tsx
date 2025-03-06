@@ -7,7 +7,7 @@ import {
   InputLabel,
 } from "@mui/material";
 import { FormEvent, useState } from "react";
-import axios from "axios";
+import axios from "../config/axios";
 import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../features/user/User";
@@ -16,16 +16,45 @@ const Register = () => {
   const navigate=useNavigate()
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [err,setErr]=useState(null);
   const dispatch=useDispatch();
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    axios.get('/');
-    dispatch(updateUser(email));
-    navigate('/');
+    axios.post('/auth/register',{email,password,firstName,lastName}).then((res)=>{
+      dispatch(updateUser(res.data.user));
+      navigate('/');
+    }).catch((err)=>{
+      setErr(err.response.data.message);
+      console.log(err);
+    });
   };
   return (
     <form onSubmit={handleSubmit} style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh'}}>
-      <Card style={{display:'flex',flexDirection:'column',paddingTop:'20px',width:'50%',height:"60vh",backgroundColor:'#d6e3e2',alignItems:'center',justifyContent:'center'}}>
+      <Card style={{display:'flex',flexDirection:'column',paddingTop:'20px',width:'50%',height:"90vh",backgroundColor:'#d6e3e2',alignItems:'center',justifyContent:'center'}}>
+        <FormControl sx={{ paddingBottom: "20px",width:'60%' }}>
+          <InputLabel htmlFor="my-firstName">First Name</InputLabel>
+          <Input
+            id="my-firstName" type="text"
+            value={firstName}
+            onChange={(e) => {
+              setFirstName(e.target.value);
+            }}
+            required
+          />
+        </FormControl>
+        <FormControl sx={{ paddingBottom: "20px",width:'60%' }}>
+          <InputLabel htmlFor="my-lastName">Last Name</InputLabel>
+          <Input
+            id="my-lastName" type="text"
+            value={lastName}
+            onChange={(e) => {
+              setLastName(e.target.value);
+            }}
+            required
+          />
+        </FormControl>
         <FormControl sx={{ paddingBottom: "20px",width:'60%' }}>
           <InputLabel htmlFor="my-email">Email address</InputLabel>
           <Input
@@ -48,6 +77,7 @@ const Register = () => {
             required
           />
         </FormControl>
+        <div style={{height:'55px',color:'red',display:'flex',alignItems:'center',fontSize:'20px'}}>{err}</div>
         <Button type="submit" sx={{marginBottom: "20px"}} color="secondary" variant="contained">Register</Button>
         <Divider sx={{marginBottom: "20px"}}>OR</Divider>
         <Button onClick={()=>navigate('/login')} variant="contained">Login</Button>
